@@ -18,19 +18,23 @@ def format_timedelta(td):
 
 
 def main(video_file):
-    video_clip = VideoFileClip(video_file)
 
+    video_clip = VideoFileClip(f'C:/Users/Никита/PycharmProjects/object_detecting/src_videos/{video_file}')
     filename, _ = os.path.splitext(video_file)
-    if not os.path.isdir(filename):
-        os.mkdir(filename)
 
-    saving_frames_per_second = min(video_clip.fps, SAVING_FRAMES_PER_SECOND)
-    step = 1/video_clip.fps if saving_frames_per_second == 0 else 1/saving_frames_per_second
-    for current_duration in np.arange(0, video_clip.duration, step):
-        frame_duration_formatted = format_timedelta(timedelta(seconds=current_duration)).replace(":", "-")
-        frame_filename = os.path.join(filename, f"frame{frame_duration_formatted}.jpg")
-        video_clip.save_frame(frame_filename, current_duration)
+    if not os.path.isdir(f'C:/Users/Никита/PycharmProjects/object_detecting/src/{filename}'):
+        os.mkdir(f'C:/Users/Никита/PycharmProjects/object_detecting/src/{filename}')
+        saving_frames_per_second = min(video_clip.fps, SAVING_FRAMES_PER_SECOND)
+        step = 1 / video_clip.fps if saving_frames_per_second == 0 else 1 / saving_frames_per_second
+        for current_duration in np.arange(0, video_clip.duration, step):
+            frame_duration_formatted = format_timedelta(timedelta(seconds=current_duration)).replace(":", "-")
+            frame_filename = os.path.join(f'C:/Users/Никита/PycharmProjects/object_detecting/src/{filename}',
+                                          f"frame{frame_duration_formatted}.jpg")
+            video_clip.save_frame(frame_filename, current_duration)
+    else:
+        return
 
 
-video_file = "src/example2.mp4"
-main(video_file)
+for item in os.listdir("C:/Users/Никита/PycharmProjects/object_detecting/src_videos/"):
+    if item.split(".")[-1] == "mp4":
+        main(item)
