@@ -3,3 +3,4 @@ venv
 src
 src_videos
 runs
+*.pt
