@@ -3,4 +3,6 @@ venv
 src
 src_videos
 runs
+results
+__pycache__/
 *.pt

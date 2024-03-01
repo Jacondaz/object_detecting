@@ -1,5 +1,6 @@
 from ultralytics import YOLO
 import os
+from object_sort import object_sort
 
 
 def detect(diction):
@@ -12,10 +13,16 @@ def detect(diction):
 
 
 if __name__ == '__main__':
-    model = YOLO('yolov8x.pt')
+    scanned_files = list()
+    model = YOLO('yolov8m.pt')
     dictionary = os.listdir("src/")
     count = 0
     for d in dictionary:
-        detect(d)
-        count += 1
-        print(f'{count} видео обработано')
+        if d not in scanned_files:
+            #detect(d)
+            object_sort(d)
+            scanned_files.append(d)
+            count += 1
+            print(f'{count} видео обработано')
+        else:
+            print("Видео уже обработано")
