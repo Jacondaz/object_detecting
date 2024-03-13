@@ -1,13 +1,18 @@
 import os
 import re
 from datetime import timedelta
+from pymongo import MongoClient
+
+client = MongoClient("mongodb://localhost:27017/")
+db = client["video_base"]
+objects = ['person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train', 'truck', 'boat', 'traffic light', 'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee', 'skis', 'snowboard', 'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard', 'tennis racket', 'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple', 'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair', 'couch', 'potted plant', 'bed', 'dining table', 'toilet', 'tv', 'laptop', 'mouse', 'remote', 'keyboard', 'cell phone', 'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors', 'teddy bear', 'hair drier', 'toothbrush']
 
 
 def object_sort(name_file):
     list_with_num = list()
     dd = os.listdir('./runs/detect/predict2/labels')
-    frames = {i: [] for i in range(70)}
-    frames_new = {i: [] for i in range(70)}
+    frames = {i: [] for i in range(79)}
+    frames_new = {i: [] for i in range(79)}
     j = 0
 
     for file in dd:
@@ -44,4 +49,6 @@ def object_sort(name_file):
 
     with open(f'./results/{name_file}.txt', 'a+') as temp:
         for key, value in frames_new.items():
-            temp.write(f'{key}, {value}\n')
+            if len(value) != 0:
+                db[objects[key]].insert_one({f'{name_file}': value})
+

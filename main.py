@@ -1,6 +1,7 @@
 from ultralytics import YOLO
 import os
 from object_sort import object_sort
+from pymongo import MongoClient
 
 
 def detect(diction):
@@ -13,16 +14,18 @@ def detect(diction):
 
 
 if __name__ == '__main__':
-    scanned_files = list()
-    model = YOLO('yolov8m.pt')
+    client = MongoClient("mongodb://localhost:27017/")
+    db = client["video_base"]
+
+    model = YOLO('yolov8n.pt')
     dictionary = os.listdir("src/")
     count = 0
     for d in dictionary:
-        if d not in scanned_files:
+        if not db['already_processed'].find_one({"name": f'{d}'}):
             #detect(d)
             object_sort(d)
-            scanned_files.append(d)
             count += 1
+            db['already_processed'].insert_one({"name": f'{d}'})
             print(f'{count} видео обработано')
         else:
             print("Видео уже обработано")
