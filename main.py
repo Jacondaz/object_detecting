@@ -28,47 +28,64 @@ def choose(n=0):
         '|': lambda x: or_search(x),
         '&': lambda x: and_search(x)
     }
+
     digits = list()
     symbol = list()
+
     list_with_collections = list(db.list_collection_names())
     list_with_collections.remove('already_processed')
     print("Доступные классы для выбора:")
+    index_list = list()
     for index, cls in enumerate(list_with_collections):
+        index_list.append(index)
         print(index, cls)
 
     print("Для выхода, введите exit/quit, или выберите номер класса")
     n = input("Выбор может быть одиночным или комбинацией 2 классов: ")
-    print()
+    temp_sym = n[0]
 
     # | - или
     # & - и
 
-    if n == "exit" or n == "quit":
+    if n == "exit" or n == "quit" or not temp_sym.isdigit():
         return
 
-    for i in n.split():
-        if i.isdigit():
-            digits.append(i)
+    for i in range(1, len(n)):
+        if n[i].isdigit():
+            temp_sym += n[i]
+            if i == len(n) - 1:
+                digits.append(temp_sym)
+                temp_sym = ''
         else:
-            symbol.append(i)
+            if temp_sym == '':
+                continue
+            else:
+                digits.append(temp_sym)
+                symbol.append(n[i])
+                temp_sym = ''
 
-    if len(symbol) == 0:
+    if len(symbol) == 0 and len(digits) == 1:
         try:
             for coll in db[list_with_collections[int(n)]].find():
                 print(f'name: {coll["name"]}')
                 print(f'time: {coll["time"]}\n')
             choose()
-        except ValueError:
-            print("Неверно выбран номер класса")
+        except (ValueError, IndexError):
+            print("Неверно выбран номер класса\n")
             choose()
     elif len(digits) == 0:
-        print("Отсутствуют номера классов в запросе, попробуйте ещё раз")
+        print("Отсутствуют номера классов в запросе, попробуйте ещё раз\n")
         choose()
-
-    elif symbol[0] == '|' or symbol[0] == '&':
-        func[symbol[0]](digits)
+    elif len(digits) == 2:
+        if all(int(x) in index_list for x in digits):
+            if symbol[0] == '|' or symbol[0] == '&' and len(symbol) == 1:
+                func[symbol[0]](digits)
+        else:
+            print("Неверно выбраны номера классов\n")
+            choose()
     else:
-        print("Неверная команда")
+        print("Неверная команда\n")
+        print(digits)
         choose()
 
 
