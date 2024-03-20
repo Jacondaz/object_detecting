@@ -10,7 +10,7 @@ objects = ['person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train',
 
 def object_sort(name_file):
     list_with_num = list()
-    dd = os.listdir('./runs/detect/predict2/labels')
+    dd = os.listdir('./runs/detect/predict/labels')
     frames = {i: [] for i in range(79)}
     frames_new = {i: [] for i in range(79)}
     j = 0
@@ -18,7 +18,7 @@ def object_sort(name_file):
     for file in dd:
         a = list(re.split('[-.]', file)[:-1])
         if a[0] == name_file:
-            with open(f'./runs/detect/predict2/labels/{file}', 'r') as text:
+            with open(f'./runs/detect/predict/labels/{file}', 'r') as text:
                 for line in text:
                     temp = list(map(int, re.split('[-.]', file)[1:-2]))
                     a = timedelta(hours=temp[0], minutes=temp[1], seconds=temp[2])
@@ -47,8 +47,6 @@ def object_sort(name_file):
             frames_new[j] = total_list
             j += 1
 
-    with open(f'./results/{name_file}.txt', 'a+') as temp:
-        for key, value in frames_new.items():
-            if len(value) != 0:
-                db[objects[key]].insert_one({f'{name_file}': value})
-
+    for key, value in frames_new.items():
+        if len(value) != 0:
+            db[objects[key]].insert_one({'name': f'{name_file}', 'time': value})
