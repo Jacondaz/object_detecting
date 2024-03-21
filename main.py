@@ -15,18 +15,50 @@ def detect(diction):
         print(f'{i} изображение обработано')
 
 
-def or_search(x):
-    print(f'Функция или, {x} - числа')
+def or_search(digits, list_with_collect):
+    """
+    for coll in db[list_with_collections[int(n)]].find():
+    print(f'name: {coll["name"]}')
+    print(f'time: {coll["time"]}\n')
+    """
+    for dig in digits:
+        print(f'Видео с классом {list_with_collect[int(dig)]}: ')
+        for coll in db[list_with_collect[int(dig)]].find():
+            print(f'name: {coll["name"]}')
+            print(f'time: {coll["time"]}\n')
+        print("-------------------------------------")
+    choose()
 
 
-def and_search(x):
-    print(f'Функция и, {x} - числа')
+def and_search(digits, list_with_collect):
+    """
+    for coll in db[list_with_collections[int(n)]].find():
+    print(f'name: {coll["name"]}')
+    print(f'time: {coll["time"]}\n')
+    """
+
+    list_with_first_names = [coll["name"] for coll in db[list_with_collect[int(digits[0])]].find()]
+    list_with_second_names = [coll["name"] for coll in db[list_with_collect[int(digits[1])]].find()]
+    list_with_common = list(set(list_with_first_names) & set(list_with_second_names))
+    if len(list_with_common) == 0:
+        print("Нет общих видеороликов")
+    else:
+        for name in list_with_common:
+            print(f'Видео {name}:')
+            print(f'Класс: {list_with_collect[int(digits[0])]}')
+            temp_elem = db[list_with_collect[int(digits[0])]].find({'name': f'{name}'})
+            print(f'Время: {temp_elem[0]["time"]}')
+            print(f'Класс: {list_with_collect[int(digits[1])]}')
+            temp_elem = db[list_with_collect[int(digits[1])]].find({'name': f'{name}'})
+            print(f'Время: {temp_elem[0]["time"]}')
+            print("-------------------------------------")
+    choose()
 
 
-def choose(n=0):
+def choose():
     func = {
-        '|': lambda x: or_search(x),
-        '&': lambda x: and_search(x)
+        '|': lambda x, y: or_search(x, y),
+        '&': lambda x, y: and_search(x, y)
     }
 
     digits = list()
@@ -42,6 +74,8 @@ def choose(n=0):
 
     print("Для выхода, введите exit/quit, или выберите номер класса")
     n = input("Выбор может быть одиночным или комбинацией 2 классов: ")
+    print()
+
     temp_sym = n[0]
 
     # | - или
@@ -79,7 +113,7 @@ def choose(n=0):
     elif len(digits) == 2:
         if all(int(x) in index_list for x in digits):
             if symbol[0] == '|' or symbol[0] == '&' and len(symbol) == 1:
-                func[symbol[0]](digits)
+                func[symbol[0]](digits, list_with_collections)
         else:
             print("Неверно выбраны номера классов\n")
             choose()
