@@ -1,5 +1,3 @@
-import pprint
-
 from ultralytics import YOLO
 import os
 from object_sort import object_sort
@@ -55,10 +53,65 @@ def and_search(digits, list_with_collect):
     choose()
 
 
+def and_and_search(digits, list_with_collect):
+    list_with_first_names = [coll["name"] for coll in db[list_with_collect[int(digits[0])]].find()]
+    list_with_second_names = [coll["name"] for coll in db[list_with_collect[int(digits[1])]].find()]
+    list_with_common = list(set(list_with_first_names) & set(list_with_second_names))
+    if len(list_with_common) == 0:
+        print("Нет общих видеороликов")
+    else:
+        for name in list_with_common:
+            t1 = db[list_with_collect[int(digits[0])]].find({'name': f'{name}'})
+            t2 = db[list_with_collect[int(digits[1])]].find({'name': f'{name}'})
+            times = find_common_times(t1[0]['time'], t2[0]['time'])
+            name1 = list_with_collect[int(digits[0])]
+            name2 = list_with_collect[int(digits[1])]
+            print(f'Видео {name}:')
+            print(f'Общее время для классов {name1} и {name2}: ')
+            if times:
+                print(times)
+                print("-------------------------------------")
+            else:
+                print("Совпадений по времени не найдено")
+                print("-------------------------------------")
+    choose()
+
+
+def find_common_times(time1, time2):
+    print(time1)
+    print(time2)
+    comm_time = list()
+    for i in time1:
+        t1r = i.split('-')
+        for j in time2:
+            t2r = j.split('-')
+            if len(t1r) != 1 and len(t2r) != 1:
+                t1_range = list(range(int(t1r[0]), int(t1r[1]) + 1))
+                t2_range = list(range(int(t2r[0]), int(t2r[1]) + 1))
+                temp = list(set(t1_range) & set(t2_range))
+                temp.sort()
+                if temp:
+                    comm_time.append(f'{temp[0]}-{temp[-1]}')
+            else:
+                if len(t1r) == 1 and len(t2r) == 1:
+                    if t1r[0] == t2r[0]:
+                        comm_time.append(t1r[0])
+                elif len(t1r) == 1:
+                    t2_range = list(range(int(t2r[0]), int(t2r[1]) + 1))
+                    if int(t1r[0]) in t2_range:
+                        comm_time.append(t1r[0])
+                elif len(t2r) == 1:
+                    t1_range = list(range(int(t1r[0]), int(t1r[1]) + 1))
+                    if int(t2r[0]) in t1_range:
+                        comm_time.append(t2r[0])
+    return comm_time
+
+
 def choose():
     func = {
         '|': lambda x, y: or_search(x, y),
-        '&': lambda x, y: and_search(x, y)
+        '&': lambda x, y: and_search(x, y),
+        '&&': lambda x, y: and_and_search(x, y)
     }
 
     digits = list()
@@ -90,13 +143,13 @@ def choose():
             if i == len(n) - 1:
                 digits.append(temp_sym)
                 temp_sym = ''
+        elif n[i] == ' ':
+            continue
         else:
-            if temp_sym == '':
-                continue
-            else:
+            if temp_sym != '':
                 digits.append(temp_sym)
-                symbol.append(n[i])
-                temp_sym = ''
+            symbol.append(n[i])
+            temp_sym = ''
 
     if len(symbol) == 0 and len(digits) == 1:
         try:
@@ -114,6 +167,9 @@ def choose():
         if all(int(x) in index_list for x in digits):
             if symbol[0] == '|' or symbol[0] == '&' and len(symbol) == 1:
                 func[symbol[0]](digits, list_with_collections)
+            elif len(symbol) == 2:
+                if all(sym == '&' for sym in symbol):
+                    func['&&'](digits, list_with_collections)
         else:
             print("Неверно выбраны номера классов\n")
             choose()
